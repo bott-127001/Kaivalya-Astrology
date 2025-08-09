@@ -23,7 +23,8 @@ app.use(cors({
   ],
   credentials: true
 }))
-app.use(express.json({ limit: '20mb' }));
+app.use(express.json({ limit: '50mb' }));
+app.use(express.urlencoded({ limit: '50mb', extended: true }));
 
 const JWT_SECRET = process.env.JWT_SECRET || 'your_jwt_secret_here' // Use env var in production
 
@@ -179,7 +180,7 @@ const storage = multer.diskStorage({
     cb(null, uniqueSuffix + '-' + file.originalname)
   }
 })
-const upload = multer({ storage })
+const upload = multer({ storage, limits: { fileSize: 50 * 1024 * 1024 } })
 
 // Auth endpoints
 app.post('/api/auth/register', async (req, res) => {
