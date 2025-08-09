@@ -93,12 +93,19 @@ function AdminProducts () {
         setFormLoading(false)
         return
       }
-      // Upload image
+      // Upload image first to avoid large JSON bodies
       const formData = new FormData()
       formData.append('images', selectedFile)
-      const uploadRes = await fetchWithAuth(`${API_BASE_URL}/api/upload`, { method: 'POST', body: formData })
+      const uploadRes = await fetchWithAuth(API_ENDPOINTS.UPLOAD, { method: 'POST', body: formData })
       const { urls } = await uploadRes.json()
-      imageUrl = urls[0]
+      imageUrl = urls?.[0] || ''
+    } else if (selectedFile) {
+      // When editing, if a new file is chosen, upload and replace the image URL
+      const formData = new FormData()
+      formData.append('images', selectedFile)
+      const uploadRes = await fetchWithAuth(API_ENDPOINTS.UPLOAD, { method: 'POST', body: formData })
+      const { urls } = await uploadRes.json()
+      imageUrl = urls?.[0] || imageUrl
     }
 
     const productData = {

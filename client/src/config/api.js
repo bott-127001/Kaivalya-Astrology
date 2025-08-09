@@ -1,9 +1,27 @@
 // API configuration for different environments
-export const API_BASE_URL = process.env.REACT_APP_API_URL || (
-  process.env.NODE_ENV === 'production'
-    ? 'https://kushal-backend.onrender.com'
-    : 'http://localhost:5000'
+const DEFAULT_PROD_API = 'https://kushal-backend.onrender.com'
+const DEFAULT_DEV_API = 'http://localhost:5000'
+
+// Resolve at build-time, then harden at runtime to avoid pointing to the frontend origin by mistake
+const resolvedBase = (process.env.REACT_APP_API_URL && process.env.REACT_APP_API_URL.trim()) || (
+  process.env.NODE_ENV === 'production' ? DEFAULT_PROD_API : DEFAULT_DEV_API
 )
+
+let runtimeBase = resolvedBase
+if (typeof window !== 'undefined') {
+  try {
+    const resolvedUrl = new URL(resolvedBase)
+    // If misconfigured to the current frontend origin, force backend default in production
+    if (process.env.NODE_ENV === 'production' && resolvedUrl.origin === window.location.origin) {
+      runtimeBase = DEFAULT_PROD_API
+    }
+  } catch (e) {
+    // If resolvedBase isn't a valid URL, fall back safely
+    runtimeBase = process.env.NODE_ENV === 'production' ? DEFAULT_PROD_API : DEFAULT_DEV_API
+  }
+}
+
+export const API_BASE_URL = runtimeBase
 
 export const API_ENDPOINTS = {
   // Auth endpoints
