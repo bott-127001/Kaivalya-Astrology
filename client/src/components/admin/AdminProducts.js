@@ -1,6 +1,6 @@
 import React, { useEffect, useState, useCallback } from 'react'
 import { useDropzone } from 'react-dropzone'
-import API_ENDPOINTS from '../../config/api'
+import API_ENDPOINTS, { API_BASE_URL } from '../../config/api'
 import fetchWithAuth from '../../utils/fetchWithAuth'
 
 function AdminProducts () {
@@ -24,7 +24,7 @@ function AdminProducts () {
   function fetchProducts () {
     setLoading(true)
     setError(null)
-    fetchWithAuth('/api/products')
+    fetchWithAuth(API_ENDPOINTS.ADMIN_PRODUCTS)
       .then(res => {
         if (!res.ok) throw new Error('Failed to fetch products')
         return res.json()
@@ -96,7 +96,7 @@ function AdminProducts () {
       // Upload image
       const formData = new FormData()
       formData.append('images', selectedFile)
-      const uploadRes = await fetchWithAuth('/api/upload', { method: 'POST', body: formData })
+      const uploadRes = await fetchWithAuth(`${API_BASE_URL}/api/upload`, { method: 'POST', body: formData })
       const { urls } = await uploadRes.json()
       imageUrl = urls[0]
     }
@@ -112,7 +112,7 @@ function AdminProducts () {
     try {
       let res, data
       if (editId) {
-        res = await fetchWithAuth(`/api/products/${editId}`, {
+        res = await fetchWithAuth(`${API_ENDPOINTS.ADMIN_PRODUCTS}/${editId}`, {
           method: 'PUT',
           headers: {
             'Content-Type': 'application/json',
@@ -120,7 +120,7 @@ function AdminProducts () {
           body: JSON.stringify(productData)
         })
       } else {
-        res = await fetchWithAuth('/api/products', {
+        res = await fetchWithAuth(API_ENDPOINTS.ADMIN_PRODUCTS, {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
@@ -147,7 +147,7 @@ function AdminProducts () {
     setDeleteLoading(true)
     setDeleteError(null)
     try {
-      const res = await fetchWithAuth(`/api/products/${deleteId}`, {
+      const res = await fetchWithAuth(`${API_ENDPOINTS.ADMIN_PRODUCTS}/${deleteId}`, {
         method: 'DELETE',
       })
       const data = await res.json()
