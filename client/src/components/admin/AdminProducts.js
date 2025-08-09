@@ -108,11 +108,21 @@ function AdminProducts () {
       imageUrl = urls?.[0] || imageUrl
     }
 
-    // Prevent sending base64 data URIs in JSON (causes 413). Require upload first.
+    // If the image is a base64 data URI (legacy records), convert and upload it automatically
     if (imageUrl && imageUrl.startsWith('data:')) {
-      setFormError('This image is embedded as base64. Please upload the image file so we can store and use its URL instead.')
-      setFormLoading(false)
-      return
+      try {
+        const blob = dataUriToBlob(imageUrl)
+        const ext = (blob.type.split('/')[1] || 'png').split(';')[0]
+        const formData = new FormData()
+        formData.append('images', blob, `image.${ext}`)
+        const uploadRes = await fetchWithAuth(API_ENDPOINTS.UPLOAD, { method: 'POST', body: formData })
+        const { urls } = await uploadRes.json()
+        imageUrl = urls?.[0] || ''
+      } catch (err) {
+        setFormError('Failed to process embedded image. Please reselect the image file.')
+        setFormLoading(false)
+        return
+      }
     }
 
     const productData = {
@@ -155,6 +165,18 @@ function AdminProducts () {
     } finally {
       setFormLoading(false)
     }
+  }
+
+  function dataUriToBlob (dataURI) {
+    const parts = dataURI.split(',')
+    if (parts.length < 2) throw new Error('Invalid data URI')
+    const mimeMatch = parts[0].match(/:(.*?);/)
+    const mime = mimeMatch ? mimeMatch[1] : 'image/png'
+    const byteString = atob(parts[1])
+    const byteNumbers = new Array(byteString.length)
+    for (let i = 0; i < byteString.length; i++) byteNumbers[i] = byteString.charCodeAt(i)
+    const byteArray = new Uint8Array(byteNumbers)
+    return new Blob([byteArray], { type: mime })
   }
 
   async function handleDeleteProduct () {
