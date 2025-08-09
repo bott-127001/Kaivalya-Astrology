@@ -16,16 +16,37 @@ import crypto from 'crypto'
 import 'dotenv/config'
 
 const app = express()
+
+const allowedOrigins = [
+  'http://localhost:3000',
+  'https://kushal-frontend.onrender.com',
+  'https://kushal-15gt.onrender.com'
+]
+
 app.use(cors({
-  origin: [
-    'http://localhost:3000',
-    'https://kushal-frontend.onrender.com',
-    'https://kushal-15gt.onrender.com'
-  ],
-  credentials: true
+  origin: function (origin, callback) {
+    if (!origin) return callback(null, true)
+    if (allowedOrigins.includes(origin)) return callback(null, true)
+    return callback(new Error('Not allowed by CORS'))
+  },
+  credentials: true,
+  methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
+  allowedHeaders: ['Content-Type', 'Authorization']
 }))
-app.use(express.json({ limit: '50mb' }));
-app.use(express.urlencoded({ limit: '50mb', extended: true }));
+
+app.options('*', cors({
+  origin: function (origin, callback) {
+    if (!origin) return callback(null, true)
+    if (allowedOrigins.includes(origin)) return callback(null, true)
+    return callback(new Error('Not allowed by CORS'))
+  },
+  credentials: true,
+  methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
+  allowedHeaders: ['Content-Type', 'Authorization']
+}))
+
+app.use(express.json({ limit: '50mb' }))
+app.use(express.urlencoded({ limit: '50mb', extended: true }))
 
 const JWT_SECRET = process.env.JWT_SECRET || 'your_jwt_secret_here' // Use env var in production
 
@@ -279,13 +300,13 @@ function authenticateJWT (req, res, next) {
     jwt.verify(token, JWT_SECRET, (err, user) => {
       if (err) {
         console.log('JWT verification error:', err)
-        return res.sendStatus(403) // Forbidden
+        return res.status(403).json({ error: 'Invalid or expired token' })
       }
       req.user = user
       next()
     })
   } else {
-    res.sendStatus(401) // Unauthorized
+    res.status(401).json({ error: 'Authorization token missing' })
   }
 }
 
@@ -1682,9 +1703,15 @@ app.delete('/api/consultations/:id', authenticateJWT, async (req, res) => {
 })
 
 // Upload endpoint (single or multiple)
-app.post('/api/upload', upload.array('images', 10), (req, res) => {
-  const fileUrls = req.files.map(file => `/uploads/${file.filename}`)
-  res.json({ urls: fileUrls })
+app.post('/api/upload', (req, res, next) => {
+  upload.array('images', 10)(req, res, function (err) {
+    if (err && err.code === 'LIMIT_FILE_SIZE') {
+      return res.status(413).json({ error: 'File too large. Max 50MB per image.' })
+    }
+    if (err) return next(err)
+    const fileUrls = req.files.map(file => `/uploads/${file.filename}`)
+    res.json({ urls: fileUrls })
+  })
 })
 
 // --- PhonePe Payment Endpoints ---
@@ -1897,6 +1924,14 @@ app.get('*', (req, res) => {
 app.listen(5000, () => console.log('Server running on http://localhost:5000')) 
 
 // One-time cleanup of existing temporary users on server start
+// Centralized error handler
+// eslint-disable-next-line no-unused-vars
+app.use((err, req, res, next) => {
+  if (err && err.message === 'Not allowed by CORS') {
+    return res.status(403).json({ error: 'CORS: Origin not allowed' })
+  }
+  res.status(500).json({ error: 'Internal server error' })
+})
 setTimeout(async () => {
   try {
     const oneHourAgo = new Date(Date.now() - 60 * 60 * 1000)
