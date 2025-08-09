@@ -18,6 +18,7 @@ function AdminProducts () {
   const [deleteError, setDeleteError] = useState(null)
   const [imagePreviews, setImagePreviews] = useState([])
   const [uploading, setUploading] = useState(false)
+  const [selectedFile, setSelectedFile] = useState(null)
 
   function fetchProducts () {
     setLoading(true)
@@ -70,14 +71,10 @@ function AdminProducts () {
   }
 
   const onDrop = useCallback(async (acceptedFiles) => {
-    if (!acceptedFiles.length) return
-    const file = acceptedFiles[0]
-    const reader = new window.FileReader()
-    reader.onloadend = () => {
-      setForm(f => ({ ...f, image: reader.result }))
-      setImagePreviews([reader.result])
-    }
-    reader.readAsDataURL(file)
+    if (!acceptedFiles.length) return;
+    const file = acceptedFiles[0];
+    setSelectedFile(file);
+    setImagePreviews([URL.createObjectURL(file)]);
   }, [])
 
   const { getRootProps, getInputProps, isDragActive } = useDropzone({ onDrop, accept: { 'image/*': [] }, multiple: true })
@@ -86,19 +83,32 @@ function AdminProducts () {
     e.preventDefault()
     setFormError(null)
     setFormLoading(true)
-    if (!form.image) {
-      setFormError('Please upload a product image.')
-      setFormLoading(false)
-      return
+
+    let imageUrl = form.image
+
+    if (!editId) {
+      if (!selectedFile) {
+        setFormError('Please upload a product image.')
+        setFormLoading(false)
+        return
+      }
+      // Upload image
+      const formData = new FormData()
+      formData.append('images', selectedFile)
+      const uploadRes = await fetch('/api/upload', { method: 'POST', body: formData })
+      const { urls } = await uploadRes.json()
+      imageUrl = urls[0]
     }
+
     const token = localStorage.getItem('adminToken')
-    // Prepare product data
     const productData = {
       ...form,
       description: form.shortDescription,
-      specs: form.specs
+      specs: form.specs,
+      image: imageUrl
     }
     delete productData.shortDescription
+
     try {
       let res, data
       if (editId) {
@@ -111,21 +121,13 @@ function AdminProducts () {
           body: JSON.stringify(productData)
         })
       } else {
-        // Upload image
-        const formData = new FormData()
-        formData.append('images', file) // file = selected image file
-        const uploadRes = await fetch('/api/upload', { method: 'POST', body: formData })
-        const { urls } = await uploadRes.json()
-        const imageUrl = urls[0]
-
-        // Create product
         res = await fetch('/api/products', {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
             'Authorization': `Bearer ${token}`
           },
-          body: JSON.stringify({ ...productData, image: imageUrl })
+          body: JSON.stringify(productData)
         })
       }
       data = await res.json()
@@ -133,6 +135,8 @@ function AdminProducts () {
       setShowModal(false)
       setEditId(null)
       setForm({ image: '', title: '', shortDescription: '', price: '', originalPrice: '', category: '', material: '', style: '', description: '', specs: '' })
+      setSelectedFile(null)
+      setImagePreviews([])
       fetchProducts()
     } catch (err) {
       setFormError(err.message)

@@ -23,7 +23,7 @@ app.use(cors({
   ],
   credentials: true
 }))
-app.use(express.json())
+app.use(express.json({ limit: '20mb' }));
 
 const JWT_SECRET = process.env.JWT_SECRET || 'your_jwt_secret_here' // Use env var in production
 
