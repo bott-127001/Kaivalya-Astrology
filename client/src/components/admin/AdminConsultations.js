@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react'
 import { Link } from 'react-router-dom'
 import API_ENDPOINTS from '../../config/api'
+import fetchWithAuth from '../../utils/fetchWithAuth'
 
 function AdminConsultations () {
   const [consultations, setConsultations] = useState([])
@@ -11,12 +12,7 @@ function AdminConsultations () {
   function fetchConsultations () {
     setLoading(true)
     setError(null)
-    const token = localStorage.getItem('adminToken')
-    fetch(API_ENDPOINTS.ADMIN_CONSULTATIONS, {
-      headers: {
-        'Authorization': `Bearer ${token}`
-      }
-    })
+    fetchWithAuth(API_ENDPOINTS.ADMIN_CONSULTATIONS)
       .then(res => {
         if (!res.ok) throw new Error('Failed to fetch consultations')
         return res.json()
@@ -143,4 +139,4 @@ function AdminConsultations () {
   )
 }
 
-export default AdminConsultations 
+export default AdminConsultations

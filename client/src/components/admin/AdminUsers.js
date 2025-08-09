@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from 'react'
 import API_ENDPOINTS from '../../config/api'
+import fetchWithAuth from '../../utils/fetchWithAuth'
 
 function AdminUsers () {
   const [users, setUsers] = useState([])
@@ -16,12 +17,7 @@ function AdminUsers () {
   function fetchUsers () {
     setLoading(true)
     setError(null)
-    const token = localStorage.getItem('adminToken')
-    fetch(API_ENDPOINTS.ADMIN_USERS, {
-      headers: {
-        'Authorization': `Bearer ${token}`
-      }
-    })
+    fetchWithAuth(API_ENDPOINTS.ADMIN_USERS)
       .then(res => {
         if (!res.ok) throw new Error('Failed to fetch users')
         return res.json()
@@ -52,14 +48,10 @@ function AdminUsers () {
   async function handleBlockUnblockUser (user) {
     setBlockLoading(true)
     setBlockError(null)
-    const token = localStorage.getItem('adminToken')
     try {
       const endpoint = user.isBlocked ? 'unblock' : 'block'
-      const res = await fetch(`${API_ENDPOINTS.ADMIN_USERS}/${user._id}/${endpoint}`, {
+      const res = await fetchWithAuth(`${API_ENDPOINTS.ADMIN_USERS}/${user._id}/${endpoint}`, {
         method: 'PUT',
-        headers: {
-          'Authorization': `Bearer ${token}`
-        }
       })
       const data = await res.json()
       if (!res.ok) throw new Error(data.error || 'Failed to update user status')
@@ -75,13 +67,9 @@ function AdminUsers () {
   async function handleDeleteUser () {
     setDeleteLoading(true)
     setDeleteError(null)
-    const token = localStorage.getItem('adminToken')
     try {
-      const res = await fetch(`${API_ENDPOINTS.ADMIN_USERS}/${deleteId}`, {
+      const res = await fetchWithAuth(`${API_ENDPOINTS.ADMIN_USERS}/${deleteId}`, {
         method: 'DELETE',
-        headers: {
-          'Authorization': `Bearer ${token}`
-        }
       })
       const data = await res.json()
       if (!res.ok) throw new Error(data.error || 'Failed to delete user')
@@ -187,4 +175,4 @@ function AdminUsers () {
   )
 }
 
-export default AdminUsers 
+export default AdminUsers

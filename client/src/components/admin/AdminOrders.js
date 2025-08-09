@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from 'react'
 import API_ENDPOINTS from '../../config/api'
+import fetchWithAuth from '../../utils/fetchWithAuth'
 
 function AdminOrders () {
   const [orders, setOrders] = useState([])
@@ -18,12 +19,7 @@ function AdminOrders () {
   function fetchOrders () {
     setLoading(true)
     setError(null)
-    const token = localStorage.getItem('adminToken')
-    fetch(API_ENDPOINTS.ADMIN_ORDERS, {
-      headers: {
-        'Authorization': `Bearer ${token}`
-      }
-    })
+    fetchWithAuth(API_ENDPOINTS.ADMIN_ORDERS)
       .then(res => {
         if (!res.ok) throw new Error('Failed to fetch orders')
         return res.json()
@@ -56,13 +52,11 @@ function AdminOrders () {
     e.preventDefault()
     setStatusError(null)
     setStatusLoading(true)
-    const token = localStorage.getItem('adminToken')
     try {
-      const res = await fetch(`${API_ENDPOINTS.ADMIN_ORDERS}/${statusOrderId}/status`, {
+      const res = await fetchWithAuth(`${API_ENDPOINTS.ADMIN_ORDERS}/${statusOrderId}/status`, {
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json',
-          'Authorization': `Bearer ${token}`
         },
         body: JSON.stringify({ status: newStatus })
       })
@@ -82,13 +76,9 @@ function AdminOrders () {
   async function handleDeleteOrder () {
     setDeleteLoading(true)
     setDeleteError(null)
-    const token = localStorage.getItem('adminToken')
     try {
-      const res = await fetch(`${API_ENDPOINTS.ADMIN_ORDERS}/${deleteId}`, {
+      const res = await fetchWithAuth(`${API_ENDPOINTS.ADMIN_ORDERS}/${deleteId}`, {
         method: 'DELETE',
-        headers: {
-          'Authorization': `Bearer ${token}`
-        }
       })
       const data = await res.json()
       if (!res.ok) throw new Error(data.error || 'Failed to delete order')
@@ -218,4 +208,4 @@ function AdminOrders () {
   )
 }
 
-export default AdminOrders 
+export default AdminOrders

@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from 'react'
 import { useNavigate, NavLink, Outlet } from 'react-router-dom'
+import fetchWithAuth from '../../utils/fetchWithAuth'
 
 function AdminDashboard () {
   const navigate = useNavigate()
@@ -22,12 +23,7 @@ function AdminDashboard () {
 
   const fetchAnalytics = async () => {
     try {
-      const token = localStorage.getItem('adminToken')
-      const response = await fetch('/api/admin/analytics/dashboard', {
-        headers: {
-          'Authorization': `Bearer ${token}`
-        }
-      })
+      const response = await fetchWithAuth('/api/admin/analytics/dashboard')
       if (response.ok) {
         const data = await response.json()
         setAnalytics(data)
@@ -41,7 +37,7 @@ function AdminDashboard () {
 
   const fetchConsultationBlock = async () => {
     try {
-      const response = await fetch('/api/settings/consultation-blocked')
+      const response = await fetchWithAuth('/api/settings/consultation-blocked')
       const data = await response.json()
       setIsConsultationBlocked(!!data.isConsultationBlocked)
       setConsultationBlockedUntil(data.consultationBlockedUntil ? data.consultationBlockedUntil.slice(0, 10) : '')
@@ -54,12 +50,10 @@ function AdminDashboard () {
     setBlockLoading(true)
     setBlockError('')
     try {
-      const token = localStorage.getItem('adminToken')
-      const response = await fetch('/api/settings/consultation-blocked', {
+      const response = await fetchWithAuth('/api/settings/consultation-blocked', {
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json',
-          'Authorization': `Bearer ${token}`
         },
         body: JSON.stringify({ isConsultationBlocked: !isConsultationBlocked })
       })
@@ -78,12 +72,10 @@ function AdminDashboard () {
     setBlockLoading(true)
     setBlockError('')
     try {
-      const token = localStorage.getItem('adminToken')
-      const response = await fetch('/api/settings/consultation-blocked', {
+      const response = await fetchWithAuth('/api/settings/consultation-blocked', {
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json',
-          'Authorization': `Bearer ${token}`
         },
         body: JSON.stringify({ consultationBlockedUntil })
       })
@@ -300,4 +292,4 @@ function AdminDashboard () {
   )
 }
 
-export default AdminDashboard 
+export default AdminDashboard

@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from 'react'
 import API_ENDPOINTS from '../../config/api'
+import fetchWithAuth from '../../utils/fetchWithAuth'
 
 function AdminBlogs () {
   const [blogs, setBlogs] = useState([])
@@ -28,7 +29,7 @@ function AdminBlogs () {
   function fetchBlogs () {
     setLoading(true)
     setError(null)
-    fetch(API_ENDPOINTS.ADMIN_BLOGS)
+    fetchWithAuth(API_ENDPOINTS.ADMIN_BLOGS)
       .then(res => {
         if (!res.ok) throw new Error('Failed to fetch blogs')
         return res.json()
@@ -129,7 +130,6 @@ function AdminBlogs () {
     e.preventDefault()
     setFormError(null)
     setFormLoading(true)
-    const token = localStorage.getItem('adminToken')
     try {
       let res, data
       const payload = {
@@ -141,20 +141,18 @@ function AdminBlogs () {
       if (!payload.readTime) payload.readTime = '5 min' // fallback default
       if (!payload.summary) payload.summary = form.content.slice(0, 120) + '...'
       if (editId) {
-        res = await fetch(`${API_ENDPOINTS.ADMIN_BLOGS}/${editId}`, {
+        res = await fetchWithAuth(`${API_ENDPOINTS.ADMIN_BLOGS}/${editId}`, {
           method: 'PUT',
           headers: {
             'Content-Type': 'application/json',
-            'Authorization': `Bearer ${token}`
           },
           body: JSON.stringify(payload)
         })
       } else {
-        res = await fetch(API_ENDPOINTS.ADMIN_BLOGS, {
+        res = await fetchWithAuth(API_ENDPOINTS.ADMIN_BLOGS, {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
-            'Authorization': `Bearer ${token}`
           },
           body: JSON.stringify(payload)
         })
@@ -175,13 +173,9 @@ function AdminBlogs () {
   async function handleDeleteBlog () {
     setDeleteLoading(true)
     setDeleteError(null)
-    const token = localStorage.getItem('adminToken')
     try {
-      const res = await fetch(`${API_ENDPOINTS.ADMIN_BLOGS}/${deleteId}`, {
+      const res = await fetchWithAuth(`${API_ENDPOINTS.ADMIN_BLOGS}/${deleteId}`, {
         method: 'DELETE',
-        headers: {
-          'Authorization': `Bearer ${token}`
-        }
       })
       const data = await res.json()
       if (!res.ok) throw new Error(data.error || 'Failed to delete blog')
@@ -293,4 +287,4 @@ function AdminBlogs () {
   )
 }
 
-export default AdminBlogs 
+export default AdminBlogs

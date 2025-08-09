@@ -1,6 +1,7 @@
 import React, { useEffect, useState, useCallback } from 'react'
 import { useDropzone } from 'react-dropzone'
 import API_ENDPOINTS from '../../config/api'
+import fetchWithAuth from '../../utils/fetchWithAuth'
 
 function AdminProducts () {
   const [products, setProducts] = useState([])
@@ -23,7 +24,7 @@ function AdminProducts () {
   function fetchProducts () {
     setLoading(true)
     setError(null)
-    fetch('/api/products')
+    fetchWithAuth('/api/products')
       .then(res => {
         if (!res.ok) throw new Error('Failed to fetch products')
         return res.json()
@@ -95,12 +96,11 @@ function AdminProducts () {
       // Upload image
       const formData = new FormData()
       formData.append('images', selectedFile)
-      const uploadRes = await fetch('/api/upload', { method: 'POST', body: formData })
+      const uploadRes = await fetchWithAuth('/api/upload', { method: 'POST', body: formData })
       const { urls } = await uploadRes.json()
       imageUrl = urls[0]
     }
 
-    const token = localStorage.getItem('adminToken')
     const productData = {
       ...form,
       description: form.shortDescription,
@@ -112,20 +112,18 @@ function AdminProducts () {
     try {
       let res, data
       if (editId) {
-        res = await fetch(`/api/products/${editId}`, {
+        res = await fetchWithAuth(`/api/products/${editId}`, {
           method: 'PUT',
           headers: {
             'Content-Type': 'application/json',
-            'Authorization': `Bearer ${token}`
           },
           body: JSON.stringify(productData)
         })
       } else {
-        res = await fetch('/api/products', {
+        res = await fetchWithAuth('/api/products', {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
-            'Authorization': `Bearer ${token}`
           },
           body: JSON.stringify(productData)
         })
@@ -148,13 +146,9 @@ function AdminProducts () {
   async function handleDeleteProduct () {
     setDeleteLoading(true)
     setDeleteError(null)
-    const token = localStorage.getItem('adminToken')
     try {
-      const res = await fetch(`/api/products/${deleteId}`, {
+      const res = await fetchWithAuth(`/api/products/${deleteId}`, {
         method: 'DELETE',
-        headers: {
-          'Authorization': `Bearer ${token}`
-        }
       })
       const data = await res.json()
       if (!res.ok) throw new Error(data.error || 'Failed to delete product')
@@ -162,7 +156,8 @@ function AdminProducts () {
       fetchProducts()
     } catch (err) {
       setDeleteError(err.message)
-    } finally {
+    }
+    finally {
       setDeleteLoading(false)
     }
   }
