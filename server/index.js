@@ -18,8 +18,9 @@ import 'dotenv/config'
 const app = express()
 app.use(cors({
   origin: [
-    'http://localhost:3000', // For local development
-    'https://kushal-15gt.onrender.com' // Your Render production domain
+    'http://localhost:3000',
+    'https://kushal-frontend.onrender.com',
+    'https://kushal-15gt.onrender.com'
   ],
   credentials: true
 }))

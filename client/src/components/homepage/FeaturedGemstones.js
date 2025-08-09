@@ -4,6 +4,7 @@ import useAuth from '../../store/auth'
 import useCart from '../../store/cart'
 import AuthPromptModal from './AuthPromptModal'
 import API_ENDPOINTS from '../../config/api'
+import { API_BASE_URL } from '../../config/api'
 
 function FeaturedGemstones () {
   const [gemstones, setGemstones] = useState([])
@@ -17,7 +18,7 @@ function FeaturedGemstones () {
   const [showAuthModal, setShowAuthModal] = useState(false)
 
   useEffect(() => {
-    fetch('/api/products?page=1&limit=3')
+    fetch(`${API_BASE_URL}/api/products?page=1&limit=3`)
       .then(res => {
         if (!res.ok) throw new Error('Failed to fetch products')
         return res.json()

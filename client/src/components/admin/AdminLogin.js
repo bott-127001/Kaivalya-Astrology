@@ -1,5 +1,7 @@
 import React, { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
+import API_ENDPOINTS from '../../config/api'
+import useAuth from '../../store/auth'
 
 function AdminLogin () {
   const [form, setForm] = useState({ email: '', password: '', adminCode: '' })
@@ -17,14 +19,16 @@ function AdminLogin () {
     setError(null)
     setLoading(true)
     try {
-      const res = await fetch('/api/admin/login', {
+      const res = await fetch(API_ENDPOINTS.ADMIN_LOGIN, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(form)
       })
       const data = await res.json()
       if (!res.ok) throw new Error(data.error || 'Login failed')
+      // store admin token also as user token so admin routes with adminAuth work
       localStorage.setItem('adminToken', data.token)
+      useAuth.getState().login({ email: data.user?.email, isAdmin: true }, data.token)
       navigate('/admin')
     } catch (err) {
       setError(err.message)
