@@ -490,6 +490,10 @@ app.get('/api/services', (req, res) => res.json(services))
 app.post('/api/products', adminAuth, async (req, res) => {
   try {
     const { price, originalPrice, image } = req.body
+    // Guard against base64 images sent in JSON
+    if (image && typeof image === 'string' && image.startsWith('data:')) {
+      return res.status(413).json({ error: 'Image data too large. Upload the file to /api/upload first and send the returned URL.' })
+    }
     if (!price || isNaN(Number(price))) {
       return res.status(400).json({ error: 'Discounted price is required and must be a number' })
     }
@@ -512,7 +516,10 @@ app.post('/api/products', adminAuth, async (req, res) => {
 // PUT /api/products/:id (admin)
 app.put('/api/products/:id', adminAuth, async (req, res) => {
   try {
-    const { price, originalPrice } = req.body
+    const { price, originalPrice, image } = req.body
+    if (image && typeof image === 'string' && image.startsWith('data:')) {
+      return res.status(413).json({ error: 'Image data too large. Upload the file to /api/upload first and send the returned URL.' })
+    }
     if (!price || isNaN(Number(price))) {
       return res.status(400).json({ error: 'Discounted price is required and must be a number' })
     }
@@ -1929,6 +1936,10 @@ app.listen(5000, () => console.log('Server running on http://localhost:5000'))
 app.use((err, req, res, next) => {
   if (err && err.message === 'Not allowed by CORS') {
     return res.status(403).json({ error: 'CORS: Origin not allowed' })
+  }
+  // Handle body-parser payload too large errors explicitly
+  if (err && (err.type === 'entity.too.large' || err.status === 413 || /request entity too large/i.test(err.message))) {
+    return res.status(413).json({ error: 'Payload too large. For images, upload to /api/upload and send only the URL in JSON.' })
   }
   res.status(500).json({ error: 'Internal server error' })
 })

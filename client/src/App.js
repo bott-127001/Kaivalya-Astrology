@@ -1,5 +1,5 @@
 import React, { useEffect } from 'react'
-import { BrowserRouter, Routes, Route } from 'react-router-dom'
+import { BrowserRouter, Routes, Route, Navigate, useLocation } from 'react-router-dom'
 import useAuth from './store/auth'
 import useCart from './store/cart'
 import HomePage from './components/homepage/HomePage'
@@ -52,7 +52,7 @@ function PageTransition ({ children }) {
 }
 
 function App () {
-  const { isAuthenticated } = useAuth()
+  const { isAuthenticated, user } = useAuth()
   const fetchCart = useCart(state => state.fetchCart)
 
   useEffect(() => {
@@ -78,13 +78,15 @@ function App () {
         <Route path='/blogs' element={<PageTransition><BlogsCatalogue /></PageTransition>} />
         <Route path='/blogs/:id' element={<PageTransition><BlogPage /></PageTransition>} />
         <Route path='/admin/login' element={<PageTransition><AdminLogin /></PageTransition>} />
-        <Route path='/admin' element={<PageTransition><AdminLayout /></PageTransition>}>
-          <Route index element={<PageTransition><AdminDashboard /></PageTransition>} />
-          <Route path='products' element={<PageTransition><AdminProducts /></PageTransition>} />
-          <Route path='users' element={<PageTransition><AdminUsers /></PageTransition>} />
-          <Route path='blogs' element={<PageTransition><AdminBlogs /></PageTransition>} />
-          <Route path='orders' element={<PageTransition><AdminOrders /></PageTransition>} />
-          <Route path='consultations' element={<PageTransition><AdminConsultations /></PageTransition>} />
+        <Route element={<RequireAdmin />}> 
+          <Route path='/admin' element={<PageTransition><AdminLayout /></PageTransition>}>
+            <Route index element={<PageTransition><AdminDashboard /></PageTransition>} />
+            <Route path='products' element={<PageTransition><AdminProducts /></PageTransition>} />
+            <Route path='users' element={<PageTransition><AdminUsers /></PageTransition>} />
+            <Route path='blogs' element={<PageTransition><AdminBlogs /></PageTransition>} />
+            <Route path='orders' element={<PageTransition><AdminOrders /></PageTransition>} />
+            <Route path='consultations' element={<PageTransition><AdminConsultations /></PageTransition>} />
+          </Route>
         </Route>
         <Route path='/profile' element={<PageTransition><ProfilePage /></PageTransition>} />
         <Route path='/checkout' element={<PageTransition><CheckoutPage /></PageTransition>} />
@@ -95,6 +97,16 @@ function App () {
       </Routes>
     </BrowserRouter>
   )
+}
+
+function RequireAdmin () {
+  const location = useLocation()
+  const { token, user } = useAuth()
+  const isAdmin = Boolean(user?.isAdmin)
+  if (!token || !isAdmin) {
+    return <Navigate to='/admin/login' replace state={{ from: location }} />
+  }
+  return <Outlet />
 }
 
 export default App 
