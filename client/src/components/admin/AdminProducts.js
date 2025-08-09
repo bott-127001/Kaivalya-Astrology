@@ -108,6 +108,13 @@ function AdminProducts () {
       imageUrl = urls?.[0] || imageUrl
     }
 
+    // Prevent sending base64 data URIs in JSON (causes 413). Require upload first.
+    if (imageUrl && imageUrl.startsWith('data:')) {
+      setFormError('This image is embedded as base64. Please upload the image file so we can store and use its URL instead.')
+      setFormLoading(false)
+      return
+    }
+
     const productData = {
       ...form,
       description: form.shortDescription,
