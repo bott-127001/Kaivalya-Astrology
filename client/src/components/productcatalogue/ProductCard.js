@@ -25,7 +25,7 @@ function ProductCard ({ product, navigate }) {
       aria-label={`View details for ${product.title}`}
     >
       {/* Discount Badge */}
-      {product.originalPrice && product.originalPrice > product.price && (
+      {product.originalPrice && parseFloat(product.originalPrice) > parseFloat(product.price) && (
         <div className='absolute top-1 right-1 z-10'>
           <div className='bg-red-600 text-white font-extrabold text-[10px] md:text-xs rounded-full px-1.5 py-0.5 shadow flex flex-col items-center justify-center border border-red-400' style={{ minWidth: 24, minHeight: 24 }}>
             <span className='text-xs md:text-sm leading-none' style={{textShadow: '0 2px 8px rgba(0,0,0,0.15)'}}>

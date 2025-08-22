@@ -74,6 +74,7 @@ function ProductCatalogue () {
         return res.json()
       })
       .then(data => {
+        console.log('Products data from API:', data.products) // Temporary log to debug
         setProducts(data.products)
         setTotalPages(data.totalPages)
         setLoading(false)
