@@ -67,7 +67,7 @@ const PHONEPE_CONFIG = {
 
 // Connect to MongoDB
 const MONGODB_URI = process.env.MONGODB_URI || 'mongodb+srv://samarthsalgar02:jDD9idZrfTLC9Y6u@cluster0.b24xtrn.mongodb.net/?retryWrites=true&w=majority&appName=Cluster0'
-mongoose.connect(MONGODB_URI, { useNewUrlParser: true, useUnifiedTopology: true })
+mongoose.connect(MONGODB_URI)
   .then(() => console.log('MongoDB connected'))
   .catch(err => console.error('MongoDB connection error:', err))
 
