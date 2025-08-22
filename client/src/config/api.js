@@ -1,5 +1,5 @@
 // API configuration for different environments
-const DEFAULT_PROD_API = 'https://kushal-backend.onrender.com'
+const DEFAULT_PROD_API = 'https://kaivalya-astrology.onrender.com'
 const DEFAULT_DEV_API = 'http://localhost:5000'
 
 // Resolve at build-time, then harden at runtime to avoid pointing to the frontend origin by mistake
