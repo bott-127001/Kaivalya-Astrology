@@ -37,4 +37,8 @@ services:
     staticPublishPath: ./client/build
     envVars:
       - key: REACT_APP_API_URL
-        value: https://kaivalya-astrology.onrender.com 
+<<<<<<< HEAD
+        value: https://kaivalya-astrology.onrender.com
+=======
+        value: https://kaivalya-astrology.onrender.com
+>>>>>>> 35def98849cd4530dba5eed17cbbccd147050b10
