@@ -19,8 +19,7 @@ const app = express()
 
 const allowedOrigins = [
   'http://localhost:3000',
-  'https://kushal-frontend.onrender.com',
-  'https://kushal-15gt.onrender.com'
+  'https://kaivalya-astrology.onrender.com'
 ]
 
 app.use(cors({
