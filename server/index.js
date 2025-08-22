@@ -2112,7 +2112,7 @@ function createOTPEmailTemplate(otp, email) {
                     • This code will expire in 10 minutes<br>
                     • Never share this code with anyone<br>
                     • If you didn't request this code, please ignore this email
-                </div>
+                </p>
                 
                 <p class="info-text">
                     Enter this code in the registration form to verify your email address 
