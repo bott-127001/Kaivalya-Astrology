@@ -31,10 +31,6 @@ function CelestialInsights () {
         <div className='grid grid-cols-1 md:grid-cols-3 gap-4 w-full max-w-6xl px-4'>
           {insights.filter(insight => insight._id || insight.slug).map(insight => (
             <div key={insight.title} className='flex flex-col bg-white rounded-xl shadow border border-gray-100 p-8 min-h-[220px]'>
-              <div className='flex items-center mb-4'>
-                <img src={insight.image || 'https://via.placeholder.com/80x80?text=Img'} alt={insight.category} className='w-16 h-16 rounded mr-4 object-cover'/>
-                <span className='text-sm font-semibold' style={{ color: '#D4AF37' }}>{insight.category}</span>
-              </div>
               <div className='font-serif font-bold text-lg mb-2'>{insight.title}</div>
               <Link to={`/blogs/${insight._id || insight.slug}`} className='text-sm font-semibold text-[#003D37] hover:text-[#002824] transition'>Read More &rarr;</Link>
             </div>
