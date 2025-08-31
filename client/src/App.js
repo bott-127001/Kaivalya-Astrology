@@ -51,6 +51,18 @@ function PageTransition ({ children }) {
   )
 }
 
+const AppLayout = () => {
+  const location = useLocation()
+  const isAdminPage = location.pathname.startsWith('/admin')
+
+  return (
+    <>
+      {!isAdminPage && <Navbar />}
+      <Outlet />
+    </>
+  )
+}
+
 function App () {
   const { isAuthenticated, user } = useAuth()
   const fetchCart = useCart(state => state.fetchCart)
@@ -63,37 +75,38 @@ function App () {
 
   return (
     <BrowserRouter>
-      <Navbar />
       <Routes>
-        <Route path='/' element={<PageTransition><HomePage /></PageTransition>} />
-        <Route path='/login' element={<PageTransition><Login /></PageTransition>} />
-        <Route path='/signup' element={<PageTransition><Signup /></PageTransition>} />
-        <Route path='/forgot-password' element={<PageTransition><ForgotPassword /></PageTransition>} />
-        <Route path='/reset-password' element={<PageTransition><ResetPassword /></PageTransition>} />
-        <Route path='/products' element={<PageTransition><ProductCatalogue /></PageTransition>} />
-        <Route path='/cart' element={<PageTransition><CartPage /></PageTransition>} />
-        <Route path='/products/:id' element={<PageTransition><ProductDetails /></PageTransition>} />
-        <Route path='/order-confirmation' element={<PageTransition><OrderConfirmation /></PageTransition>} />
-        <Route path='/consultation' element={<PageTransition><ConsultationPage /></PageTransition>} />
-        <Route path='/blogs' element={<PageTransition><BlogsCatalogue /></PageTransition>} />
-        <Route path='/blogs/:id' element={<PageTransition><BlogPage /></PageTransition>} />
-        <Route path='/admin/login' element={<PageTransition><AdminLogin /></PageTransition>} />
-        <Route element={<RequireAdmin />}> 
-          <Route path='/admin' element={<PageTransition><AdminLayout /></PageTransition>}>
-            <Route index element={<PageTransition><AdminDashboard /></PageTransition>} />
-            <Route path='products' element={<PageTransition><AdminProducts /></PageTransition>} />
-            <Route path='users' element={<PageTransition><AdminUsers /></PageTransition>} />
-            <Route path='blogs' element={<PageTransition><AdminBlogs /></PageTransition>} />
-            <Route path='orders' element={<PageTransition><AdminOrders /></PageTransition>} />
-            <Route path='consultations' element={<PageTransition><AdminConsultations /></PageTransition>} />
+        <Route element={<AppLayout />}>
+          <Route path='/' element={<PageTransition><HomePage /></PageTransition>} />
+          <Route path='/login' element={<PageTransition><Login /></PageTransition>} />
+          <Route path='/signup' element={<PageTransition><Signup /></PageTransition>} />
+          <Route path='/forgot-password' element={<PageTransition><ForgotPassword /></PageTransition>} />
+          <Route path='/reset-password' element={<PageTransition><ResetPassword /></PageTransition>} />
+          <Route path='/products' element={<PageTransition><ProductCatalogue /></PageTransition>} />
+          <Route path='/cart' element={<PageTransition><CartPage /></PageTransition>} />
+          <Route path='/products/:id' element={<PageTransition><ProductDetails /></PageTransition>} />
+          <Route path='/order-confirmation' element={<PageTransition><OrderConfirmation /></PageTransition>} />
+          <Route path='/consultation' element={<PageTransition><ConsultationPage /></PageTransition>} />
+          <Route path='/blogs' element={<PageTransition><BlogsCatalogue /></PageTransition>} />
+          <Route path='/blogs/:id' element={<PageTransition><BlogPage /></PageTransition>} />
+          <Route path='/admin/login' element={<PageTransition><AdminLogin /></PageTransition>} />
+          <Route element={<RequireAdmin />}>
+            <Route path='/admin' element={<PageTransition><AdminLayout /></PageTransition>}>
+              <Route index element={<PageTransition><AdminDashboard /></PageTransition>} />
+              <Route path='products' element={<PageTransition><AdminProducts /></PageTransition>} />
+              <Route path='users' element={<PageTransition><AdminUsers /></PageTransition>} />
+              <Route path='blogs' element={<PageTransition><AdminBlogs /></PageTransition>} />
+              <Route path='orders' element={<PageTransition><AdminOrders /></PageTransition>} />
+              <Route path='consultations' element={<PageTransition><AdminConsultations /></PageTransition>} />
+            </Route>
           </Route>
+          <Route path='/profile' element={<PageTransition><ProfilePage /></PageTransition>} />
+          <Route path='/checkout' element={<PageTransition><CheckoutPage /></PageTransition>} />
+          <Route path='/payment-status' element={<PageTransition><PaymentStatus /></PageTransition>} />
+          <Route path='/shipping-info' element={<PageTransition><ShippingInformation /></PageTransition>} />
+          <Route path='/returns-exchanges' element={<PageTransition><ReturnsExchanges /></PageTransition>} />
+          <Route path='/video-room/:consultationId' element={<VideoRoomPage />} />
         </Route>
-        <Route path='/profile' element={<PageTransition><ProfilePage /></PageTransition>} />
-        <Route path='/checkout' element={<PageTransition><CheckoutPage /></PageTransition>} />
-        <Route path='/payment-status' element={<PageTransition><PaymentStatus /></PageTransition>} />
-        <Route path='/shipping-info' element={<PageTransition><ShippingInformation /></PageTransition>} />
-        <Route path='/returns-exchanges' element={<PageTransition><ReturnsExchanges /></PageTransition>} />
-        <Route path='/video-room/:consultationId' element={<VideoRoomPage />} />
       </Routes>
     </BrowserRouter>
   )
